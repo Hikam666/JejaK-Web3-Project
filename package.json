@@ -1,0 +1,41 @@
+{
+  "name": "nsa-passport",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "contract:compile": "hardhat compile",
+    "contract:deploy": "hardhat run scripts/deploy.js --network bscTestnet"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
+    "@prisma/client": "^5.20.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "clsx": "^2.1.1",
+    "ethers": "^6.13.2",
+    "lucide-react": "^0.446.0",
+    "next": "14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.2"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.6.1",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.10",
+    "postcss": "^8",
+    "potrace": "^2.1.8",
+    "prisma": "^5.20.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Merchant {
+  id                  String         @id @default(uuid())
+  slug                String         @unique
+  businessName        String
+  businessCategory    String
+  city                String
+  phone               String
+  pin                 String         @default("123456")
+  ownerName           String
+  photoUrl            String?
+  qrisStaticUrl       String?
+  merchantAddress     String         @unique
+  encryptedPrivateKey String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  transactions        Transaction[]
+  anchors             AnchorRecord[]
+
+  @@map("merchants")
+}
+
+model Transaction {
+  id             String        @id @default(uuid())
+  merchantId     String
+  anchorId       String?
+  amount         Float
+  paymentMethod  String        @default("QRIS") // QRIS, CASH, TRANSFER
+  note           String?
+  proofImageUrl  String?
+  status         String        @default("PENDING_ANCHOR") // PENDING_ANCHOR, ANCHORED
+  createdAt      DateTime      @default(now())
+
+  merchant       Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  anchor         AnchorRecord? @relation(fields: [anchorId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId, status])
+  @@map("transactions")
+}
+
+model AnchorRecord {
+  id               String        @id @default(uuid())
+  merchantId       String
+  periodDate       DateTime      @default(now())
+  transactionCount Int
+  totalRevenue     Float
+  dataHash         String        // keccak256 hash string "0x..."
+  bscTxHash        String        // On-chain BSC transaction hash
+  blockNumber      Int?
+  status           String        @default("CONFIRMED")
+  anchoredAt       DateTime      @default(now())
+
+  merchant         Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+
+  @@index([merchantId])
+  @@map("anchor_records")
+}
+
+model RelayerLog {
+  id         String   @id @default(uuid())
+  txHash     String
+  merchantId String?
+  action     String   @default("RECORD_ANCHOR")
+  gasFeeBnb  String?
+  status     String   @default("SUCCESS")
+  createdAt  DateTime @default(now())
+
+  @@map("relayer_logs")
+}
