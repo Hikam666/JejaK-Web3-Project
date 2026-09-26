@@ -44,4 +44,26 @@ export class AuthController {
     const { encryptedPrivateKey, ...safeMerchant } = merchant;
     return safeMerchant;
   }
+
+  static async exportWallet(merchantId: string, pin: string) {
+    if (!merchantId || !pin) {
+      throw new Error("Merchant ID dan PIN keamanan wajib diisi.");
+    }
+
+    const merchant = await MerchantModel.findById(merchantId);
+    if (!merchant) {
+      throw new Error("Toko tidak ditemukan.");
+    }
+
+    if (merchant.pin !== pin.trim()) {
+      throw new Error("PIN keamanan kasir salah. Akses kunci privat ditolak.");
+    }
+
+    return {
+      merchantAddress: merchant.merchantAddress,
+      privateKey: merchant.encryptedPrivateKey,
+      businessName: merchant.businessName,
+      ownerName: merchant.ownerName,
+    };
+  }
 }

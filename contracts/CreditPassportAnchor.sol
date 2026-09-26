@@ -1,23 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
+
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
- * @title CreditPassportAnchor (Hybrid Model)
- * @dev Protokol Reputasi Kredit UMKM NSA-Passport di BNB Smart Chain (BSC).
+ * @title CreditPassportAnchor (Hybrid Model - ERC-721 & EIP-5192)
+ * @dev Protokol Reputasi Kredit UMKM JejaK di BNB Smart Chain (BSC).
  *      Mengimplementasikan Dual-Layer Token Architecture:
  *      1. Master Soulbound Credit Passport (SBT): 1 per UMKM, menyimpan reputasi & skor kumulatif.
  *      2. Batch Settlement Receipt NFTs: Dicetak setiap kali UMKM melakukan Tutup Buku (Batch #1, #2, dst.).
- *      Keduanya mengadopsi standar ERC-5192 (Minimal Soulbound Tokens - Non-Transferable).
+ *      Keduanya mengadopsi standar ERC-721 dan EIP-5192 (Minimal Soulbound Tokens - Non-Transferable).
  */
-contract CreditPassportAnchor {
-    string public constant name = "JejaK Credit Reputation Protocol";
-    string public constant symbol = "JEJAK";
+contract CreditPassportAnchor is ERC721URIStorage, Ownable {
+    using Strings for uint256;
 
     address public relayerAdmin;
 
-    // --- EIP-5192 & ERC-721 Events ---
+    // --- EIP-5192 Events ---
     event Locked(uint256 tokenId);
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
     // --- NSA Protocol Events ---
     event RecordAnchored(
@@ -81,10 +83,6 @@ contract CreditPassportAnchor {
 
     // tokenId => TokenType
     mapping(uint256 => TokenType) public tokenTypes;
-    // tokenId => owner address
-    mapping(uint256 => address) private _owners;
-    // owner => balance
-    mapping(address => uint256) private _balances;
 
     // merchant => Master SBT Token ID
     mapping(address => uint256) private _merchantMasterToken;
@@ -105,18 +103,27 @@ contract CreditPassportAnchor {
     uint256 public totalAnchoredTransactions;
     uint256 public totalMerchantsWithSBT;
 
+    // URI Metadata & Gateway Gambar Visual NFT
+    string public baseMetadataURI = "";
+    string public imageGatewayURI = "https://jejak.app/api/nft/image/";
+
     modifier onlyRelayer() {
-        require(msg.sender == relayerAdmin, "Caller is not relayer admin");
+        require(msg.sender == relayerAdmin || msg.sender == owner(), "Caller is not relayer admin");
         _;
     }
 
-    constructor() {
+    constructor() ERC721("JejaK Credit Reputation Protocol", "JEJAK") Ownable(msg.sender) {
         relayerAdmin = msg.sender;
     }
 
-    function setRelayerAdmin(address newAdmin) external onlyRelayer {
+    function setRelayerAdmin(address newAdmin) external onlyOwner {
         require(newAdmin != address(0), "Invalid new admin");
         relayerAdmin = newAdmin;
+    }
+
+    function setMetadataURIs(string memory _baseMetadataURI, string memory _imageGatewayURI) external onlyRelayer {
+        baseMetadataURI = _baseMetadataURI;
+        imageGatewayURI = _imageGatewayURI;
     }
 
     /**
@@ -152,8 +159,6 @@ contract CreditPassportAnchor {
             _merchantMasterToken[merchant] = masterTokenId;
             tokenTypes[masterTokenId] = TokenType.MASTER_SBT;
 
-            _owners[masterTokenId] = merchant;
-            _balances[merchant] += 1;
             totalMerchantsWithSBT += 1;
 
             uint8 initialTier = totalRevenue >= 10000000 ? 3 : (totalRevenue >= 1000000 ? 2 : 1);
@@ -168,7 +173,7 @@ contract CreditPassportAnchor {
                 lastUpdated: block.timestamp
             });
 
-            emit Transfer(address(0), merchant, masterTokenId);
+            _mint(merchant, masterTokenId);
             emit Locked(masterTokenId);
             emit MasterSBTMinted(merchant, masterTokenId, initialTier, initialScore, totalRevenue);
         } else {
@@ -198,8 +203,6 @@ contract CreditPassportAnchor {
         batchTokenId = _tokenCounter;
         tokenTypes[batchTokenId] = TokenType.BATCH_RECEIPT;
 
-        _owners[batchTokenId] = merchant;
-        _balances[merchant] += 1;
         _merchantBatchTokens[merchant].push(batchTokenId);
 
         batchReceipts[batchTokenId] = BatchReceipt({
@@ -211,8 +214,7 @@ contract CreditPassportAnchor {
             timestamp: block.timestamp
         });
 
-        // Pancarkan event ERC-721 dan EIP-5192 (muncul langsung di BscScan Token Txns!)
-        emit Transfer(address(0), merchant, batchTokenId);
+        _mint(merchant, batchTokenId);
         emit Locked(batchTokenId);
         emit BatchReceiptNFTMinted(merchant, batchTokenId, currentBatchCount, totalRevenue, dataHash);
 
@@ -254,7 +256,7 @@ contract CreditPassportAnchor {
         bytes32 dataHash,
         uint256 timestamp
     ) {
-        require(_owners[batchTokenId] != address(0), "Token does not exist");
+        _requireOwned(batchTokenId);
         require(tokenTypes[batchTokenId] == TokenType.BATCH_RECEIPT, "Not a batch receipt token");
         BatchReceipt memory b = batchReceipts[batchTokenId];
         return (b.merchant, b.batchIndex, b.totalRevenue, b.txCount, b.dataHash, b.timestamp);
@@ -267,81 +269,94 @@ contract CreditPassportAnchor {
     // --- EIP-5192 Soulbound Interface ---
 
     function locked(uint256 tokenId) external view returns (bool) {
-        require(_owners[tokenId] != address(0), "Token does not exist");
+        _requireOwned(tokenId);
         return true; // Keduanya non-transferable (soulbound)
     }
 
-    // --- ERC-721 Interface Functions ---
+    // --- EIP-5192 & ERC-721 Interface Support ---
 
-    function balanceOf(address owner) external view returns (uint256) {
-        require(owner != address(0), "Zero address");
-        return _balances[owner];
-    }
-
-    function ownerOf(uint256 tokenId) public view returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "Token does not exist");
-        return owner;
-    }
-
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721URIStorage)
+        returns (bool)
+    {
         return
-            interfaceId == 0x01ffc9a7 || // ERC-165
-            interfaceId == 0x80ac58cd || // ERC-721
-            interfaceId == 0x5b5e139f || // ERC-721 Metadata
-            interfaceId == 0xb45a3c0e;   // ERC-5192 Minimal Soulbound
+            interfaceId == 0xb45a3c0e || // ERC-5192 Minimal Soulbound
+            super.supportsInterface(interfaceId);
     }
 
-    function tokenURI(uint256 tokenId) external view returns (string memory) {
-        require(_owners[tokenId] != address(0), "Token does not exist");
+    // --- Soulbound Enforcement (Blocks Transfers, Allows Mint/Burn) ---
+
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    ) internal virtual override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            revert("Soulbound: Token is non-transferable");
+        }
+        return super._update(to, tokenId, auth);
+    }
+
+    // --- ERC-721 Metadata URI ---
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override(ERC721URIStorage)
+        returns (string memory)
+    {
+        _requireOwned(tokenId);
+
+        string memory customUri = super.tokenURI(tokenId);
+        if (bytes(customUri).length > 0) {
+            return customUri;
+        }
+
+        if (bytes(baseMetadataURI).length > 0) {
+            return string.concat(baseMetadataURI, tokenId.toString());
+        }
+
         TokenType tType = tokenTypes[tokenId];
+        string memory imgUrl = string.concat(imageGatewayURI, tokenId.toString());
 
         if (tType == TokenType.MASTER_SBT) {
             MasterReputation memory b = masterBadges[tokenId];
             string memory tierStr = b.tier == 3 ? "Gold" : (b.tier == 2 ? "Silver" : "Bronze");
-            return string(
-                abi.encodePacked(
-                    'data:application/json;utf8,{"name":"NSA Master Credit Passport #',
-                    _toString(tokenId),
-                    '","description":"Non-transferable Soulbound Credit Passport on BNB Chain","tier":"',
-                    tierStr,
-                    '","creditScore":',
-                    _toString(b.creditScore),
-                    ',"totalRevenue":',
-                    _toString(b.totalRevenue),
-                    '}'
-                )
+            return string.concat(
+                'data:application/json;utf8,{"name":"JejaK Master Credit Passport #',
+                tokenId.toString(),
+                '","description":"Non-transferable Soulbound Credit Passport on BNB Chain","image":"',
+                imgUrl,
+                '","attributes":[{"trait_type":"Tier","value":"',
+                tierStr,
+                '"},{"trait_type":"Credit Score","value":',
+                b.creditScore.toString(),
+                '},{"trait_type":"Total Revenue","value":',
+                b.totalRevenue.toString(),
+                '},{"trait_type":"Total Batches","value":',
+                b.totalBatches.toString(),
+                '},{"trait_type":"Soulbound Status","value":"Locked"}]}'
             );
         } else {
             BatchReceipt memory r = batchReceipts[tokenId];
-            return string(
-                abi.encodePacked(
-                    'data:application/json;utf8,{"name":"NSA Settlement Receipt Batch #',
-                    _toString(r.batchIndex),
-                    '","description":"Proof-of-Close settlement anchor on BNB Chain","batchIndex":',
-                    _toString(r.batchIndex),
-                    ',"totalRevenue":',
-                    _toString(r.totalRevenue),
-                    '}'
-                )
+            return string.concat(
+                'data:application/json;utf8,{"name":"JejaK Settlement Receipt Batch #',
+                r.batchIndex.toString(),
+                '","description":"Proof-of-Close settlement anchor on BNB Chain","image":"',
+                imgUrl,
+                '","attributes":[{"trait_type":"Batch Index","value":',
+                r.batchIndex.toString(),
+                '},{"trait_type":"Total Revenue","value":',
+                r.totalRevenue.toString(),
+                '},{"trait_type":"Transaction Count","value":',
+                r.txCount.toString(),
+                '},{"trait_type":"Type","value":"Settlement Receipt"}]}'
             );
         }
-    }
-
-    function _toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) return "0";
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
     }
 }

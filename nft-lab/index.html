@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JejaK &bull; NFT Design Studio &amp; Testing Sandbox</title>
+  <!-- Google Fonts: Inter & Cinzel for luxury serif typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+    .font-serif-lux { font-family: 'Cinzel', Georgia, serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .shadow-bubble { box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04); }
+    .preview-stage {
+      background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP APP HEADER -->
+  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-slate-950 flex items-center justify-center text-white font-bold text-sm shadow-sm border border-slate-800">
+          JK
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-slate-950 text-base tracking-tight">JejaK NFT Lab &amp; Sandbox</h1>
+            <span class="text-[10px] font-mono uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200/60 font-semibold">Testing Env</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium">Uji Coba Visual Dual-Layer Token di BNB Smart Chain</p>
+        </div>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-full border border-slate-200 text-xs font-bold">
+        <button id="tabMasterBtn" onclick="switchTab('master')" class="px-5 py-1.5 rounded-full bg-white text-slate-950 shadow-sm transition-all">
+          Layer 1: Master SBT
+        </button>
+        <button id="tabBatchBtn" onclick="switchTab('batch')" class="px-5 py-1.5 rounded-full text-slate-600 hover:text-slate-950 transition-all">
+          Layer 2: Batch Receipt NFT
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN SANDBOX WORKSPACE -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- LEFT: CONTROLS & FORM INPUTS (5 Cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-bubble space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h2 id="formTitle" class="font-black text-slate-950 text-base">Konfigurasi Master Soulbound (SBT)</h2>
+            <p class="text-xs text-slate-500">Ubah parameter untuk menguji respons visual kartu secara live.</p>
+          </div>
+          <button onclick="resetDefaults()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline">
+            Reset Nilai
+          </button>
+        </div>
+
+        <!-- FORM CONTROLS: MASTER SBT -->
+        <div id="masterControls" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Usaha / Toko</label>
+            <input type="text" id="m_businessName" value="Warung Kopi Barokah" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-600">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">UMKM ID Token</label>
+              <input type="text" id="m_umkmId" value="JK-UMKM-2026-0812" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono font-semibold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Skor Reputasi (0-850)</label>
+              <input type="number" id="m_score" value="785" min="300" max="850" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono font-semibold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tier Reputasi</label>
+              <select id="m_tier" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+                <option value="Tier Platinum (Elite Trust)">Tier Platinum (Elite Trust)</option>
+                <option value="Tier Gold (Sangat Layak)" selected>Tier Gold (Sangat Layak)</option>
+                <option value="Tier Silver (Berkembang)">Tier Silver (Berkembang)</option>
+                <option value="Tier Bronze (Toko Baru)">Tier Bronze (Toko Baru)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kategori Usaha</label>
+              <input type="text" id="m_category" value="Food &amp; Beverage (Kuliner)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kota / Wilayah</label>
+              <input type="text" id="m_region" value="Surabaya, Jawa Timur" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Omzet Bulanan (Run-Rate)</label>
+              <input type="text" id="m_runRate" value="Rp 18.500.000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Owner Wallet Address</label>
+            <input type="text" id="m_wallet" value="0xc804246e6d4016b616E7D9A51cDc79600AB94746" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono">
+          </div>
+        </div>
+
+        <!-- FORM CONTROLS: BATCH RECEIPT (HIDDEN BY DEFAULT) -->
+        <div id="batchControls" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Usaha / Toko</label>
+            <input type="text" id="b_businessName" value="Warung Kopi Barokah" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nomor Urut Batch</label>
+              <input type="text" id="b_batchNumber" value="008" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono font-semibold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Waktu Tutup Buku</label>
+              <input type="text" id="b_settlementDate" value="21 Sep 2026, 21:45 WIB" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Total Omzet Terkunci</label>
+              <input type="text" id="b_totalRevenue" value="Rp 1.450.000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono font-semibold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jumlah Transaksi Kasir</label>
+              <input type="text" id="b_txCount" value="18 Transaksi Kasir" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Porsi QRIS vs Tunai</label>
+              <input type="text" id="b_paymentMix" value="QRIS (82%) • Tunai (18%)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Bukti Fisik Nota</label>
+              <input type="text" id="b_proofRatio" value="100% Bukti Nota Terlampir" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-emerald-700">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Keccak256 Data Integrity Hash</label>
+            <input type="text" id="b_dataHash" value="0x508619bba5499daf25db4e1228fd7da6d600182d4ef16bce93f93de3ce325d52" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">BSC Transaction Hash</label>
+            <input type="text" id="b_bscTxHash" value="0x4e6e51120cd06702636beba7fa90e586852dd741ab7d6c4c62c0f25685994b01" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono">
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="pt-2 border-t border-slate-100 flex items-center gap-3">
+          <button onclick="downloadSvg()" class="flex-1 py-3 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Unduh SVG Murni</span>
+          </button>
+          <button onclick="copySvgCode()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-all flex items-center gap-1.5">
+            <span id="copyBtnText">Salin SVG</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- DESIGN EXPLANATION CARD -->
+      <div class="bg-blue-50/70 border border-blue-200/80 rounded-3xl p-5 text-xs text-blue-950 space-y-2">
+        <div class="font-black flex items-center gap-1.5 text-blue-900">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>Penerapan Nuansa Website JejaK:</span>
+        </div>
+        <ul class="list-disc list-inside space-y-1 text-slate-700 pl-1 leading-relaxed">
+          <li><strong>Pita Batik Nusantara:</strong> Mengganti warna hijau zamrud menjadi <strong>Deep Royal Navy</strong> (<code class="text-blue-700 bg-white px-1 rounded">#0A162B</code>) dipadu motif batik Kawung foil emas (<code class="text-amber-700 bg-white px-1 rounded">#D4AF37</code>).</li>
+          <li><strong>Medali Hexagon Emas 3D:</strong> Simbol warung/toko lokal dengan atap bergaris dan pohon tunas kemakmuran, berorientasi <em>"Dari Lokal Untuk Dunia"</em>.</li>
+          <li><strong>Peta Vektor Indonesia:</strong> Siluet halus kepulauan Indonesia di pojok kanan atas menjaga identitas kebangsaan.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT: LIVE PREVIEW STAGE (7 Cols) -->
+    <div class="lg:col-span-7 flex flex-col items-center">
+      <div class="w-full flex items-center justify-between mb-3 px-2">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Live Render Canvas (700 x 1050 px)</span>
+        <span id="cardLabel" class="text-xs font-black text-slate-900 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+          Layer 1: Master Soulbound Token
+        </span>
+      </div>
+
+      <!-- STAGE CONTAINER -->
+      <div class="preview-stage w-full p-6 sm:p-10 rounded-[32px] border border-slate-200/90 shadow-bubble flex items-center justify-center overflow-auto min-h-[640px]">
+        <div id="svgContainer" class="w-full max-w-[480px] sm:max-w-[520px] transition-transform hover:scale-[1.01] duration-300">
+          <!-- Live SVG injected here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentTab = 'master';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const masterBtn = document.getElementById('tabMasterBtn');
+      const batchBtn = document.getElementById('tabBatchBtn');
+      const masterControls = document.getElementById('masterControls');
+      const batchControls = document.getElementById('batchControls');
+      const formTitle = document.getElementById('formTitle');
+      const cardLabel = document.getElementById('cardLabel');
+
+      if (tab === 'master') {
+        masterBtn.className = "px-5 py-1.5 rounded-full bg-white text-slate-950 shadow-sm transition-all";
+        batchBtn.className = "px-5 py-1.5 rounded-full text-slate-600 hover:text-slate-950 transition-all";
+        masterControls.classList.remove('hidden');
+        batchControls.classList.add('hidden');
+        formTitle.innerText = "Konfigurasi Master Soulbound (SBT)";
+        cardLabel.innerText = "Layer 1: Master Soulbound Token";
+      } else {
+        batchBtn.className = "px-5 py-1.5 rounded-full bg-white text-slate-950 shadow-sm transition-all";
+        masterBtn.className = "px-5 py-1.5 rounded-full text-slate-600 hover:text-slate-950 transition-all";
+        batchControls.classList.remove('hidden');
+        masterControls.classList.add('hidden');
+        formTitle.innerText = "Konfigurasi Batch Settlement Receipt";
+        cardLabel.innerText = "Layer 2: Batch Receipt NFT";
+      }
+      render();
+    }
+
+    function render() {
+      const container = document.getElementById('svgContainer');
+      if (currentTab === 'master') {
+        const data = {
+          businessName: document.getElementById('m_businessName').value,
+          umkmId: document.getElementById('m_umkmId').value,
+          ownerWallet: document.getElementById('m_wallet').value,
+          category: document.getElementById('m_category').value,
+          region: document.getElementById('m_region').value,
+          reputationScore: document.getElementById('m_score').value + " / 850",
+          tierName: document.getElementById('m_tier').value,
+          monthlyRunRate: document.getElementById('m_runRate').value,
+        };
+        container.innerHTML = generateMasterSbtSvg(data);
+      } else {
+        const data = {
+          businessName: document.getElementById('b_businessName').value,
+          batchNumber: document.getElementById('b_batchNumber').value,
+          settlementDate: document.getElementById('b_settlementDate').value,
+          totalRevenue: document.getElementById('b_totalRevenue').value,
+          txCount: document.getElementById('b_txCount').value,
+          paymentBreakdown: document.getElementById('b_paymentMix').value,
+          proofRatio: document.getElementById('b_proofRatio').value,
+          dataHash: document.getElementById('b_dataHash').value,
+          bscTxHash: document.getElementById('b_bscTxHash').value,
+        };
+        container.innerHTML = generateBatchReceiptSvg(data);
+      }
+    }
+
+    // Attach real-time input event listeners
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', render);
+    });
+
+    function downloadSvg() {
+      const svgContent = document.getElementById('svgContainer').innerHTML;
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = currentTab === 'master' ? 'jejak-master-sbt.svg' : 'jejak-batch-receipt.svg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function copySvgCode() {
+      const svgContent = document.getElementById('svgContainer').innerHTML;
+      navigator.clipboard.writeText(svgContent).then(() => {
+        const btnText = document.getElementById('copyBtnText');
+        btnText.innerText = "Tersalin!";
+        setTimeout(() => { btnText.innerText = "Salin SVG"; }, 2000);
+      });
+    }
+
+    function resetDefaults() {
+      if (currentTab === 'master') {
+        document.getElementById('m_businessName').value = "Warung Kopi Barokah";
+        document.getElementById('m_umkmId').value = "JK-UMKM-2026-0812";
+        document.getElementById('m_score').value = 785;
+        document.getElementById('m_tier').value = "Tier Gold (Sangat Layak)";
+        document.getElementById('m_category').value = "Food & Beverage (Kuliner)";
+        document.getElementById('m_region').value = "Surabaya, Jawa Timur";
+        document.getElementById('m_runRate').value = "Rp 18.500.000";
+        document.getElementById('m_wallet').value = "0xc804246e6d4016b616E7D9A51cDc79600AB94746";
+      } else {
+        document.getElementById('b_businessName').value = "Warung Kopi Barokah";
+        document.getElementById('b_batchNumber').value = "008";
+        document.getElementById('b_settlementDate').value = "21 Sep 2026, 21:45 WIB";
+        document.getElementById('b_totalRevenue').value = "Rp 1.450.000";
+        document.getElementById('b_txCount').value = "18 Transaksi Kasir";
+        document.getElementById('b_paymentMix').value = "QRIS (82%) • Tunai (18%)";
+        document.getElementById('b_proofRatio').value = "100% Bukti Nota Terlampir";
+      }
+      render();
+    }
+
+    // Load templates from generate-svgs logic
+    // Paste identical generators for client-side live rendering
+  </script>
+
+  <script src="./generate-svgs.js"></script>
+  <script>
+    // Initial Render
+    render();
+  </script>
+</body>
+</html>

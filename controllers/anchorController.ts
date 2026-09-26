@@ -85,6 +85,9 @@ export class AnchorController {
       });
 
       return anchor;
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     });
 
     return {

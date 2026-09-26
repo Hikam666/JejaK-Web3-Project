@@ -31,6 +31,7 @@ import {
   Fingerprint,
   FileCheck,
   Gauge,
+  Download,
 } from "lucide-react";
 
 export default function LenderVerifierPage({ params }: { params: { slug: string } }) {
@@ -39,8 +40,12 @@ export default function LenderVerifierPage({ params }: { params: { slug: string 
   const [verifying, setVerifying] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
 
+  // State Modal Master SBT
+  const [showSbtModal, setShowSbtModal] = useState(false);
+
   // State Modal Audit Batch
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
+  const [batchModalTab, setBatchModalTab] = useState<"PROOF" | "NFT">("PROOF");
   const [recalculatingHash, setRecalculatingHash] = useState(false);
   const [recalcResult, setRecalcResult] = useState<{ computedHash: string; matches: boolean } | null>(null);
 
@@ -265,6 +270,27 @@ export default function LenderVerifierPage({ params }: { params: { slug: string 
                   {sbt?.creditScore || 85}/100 (Prima)
                 </span>
               </div>
+            </div>
+
+            <div className="flex gap-2 pt-3 border-t border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setShowSbtModal(true)}
+                className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Inspeksi Visual Master SBT</span>
+              </button>
+              <a
+                href={`/api/nft/metadata/${sbt?.tokenId || "1"}`}
+                target="_blank"
+                rel="noreferrer"
+                className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center gap-1 border border-slate-700"
+                title="Lihat Metadata Web3 (MetaMask Compatible)"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                <span>Metadata</span>
+              </a>
             </div>
           </div>
 
@@ -541,95 +567,159 @@ export default function LenderVerifierPage({ params }: { params: { slug: string 
               </button>
             </div>
 
-            {/* STATUS AUDIT LIVE */}
-            {recalculatingHash ? (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
-                <RefreshCw className="w-6 h-6 text-blue-700 animate-spin mx-auto" strokeWidth={1.75} />
-                <p className="text-xs font-semibold text-slate-700">
-                  Menghitung ulang Keccak256 hash dari data invoice asli...
-                </p>
-              </div>
-            ) : recalcResult && recalcResult.matches ? (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1 text-xs">
-                <div className="flex items-center gap-2 font-bold text-sm text-emerald-800">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" strokeWidth={2} />
-                  <span>100% VALID &amp; TIDAK DIMANIPULASI</span>
+            {/* TABS: CRYPTO AUDIT vs VISUAL BATCH RECEIPT NFT */}
+            <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setBatchModalTab("PROOF")}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+                  batchModalTab === "PROOF"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Uji Hash Kriptografis
+              </button>
+              <button
+                type="button"
+                onClick={() => setBatchModalTab("NFT")}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+                  batchModalTab === "NFT"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Visual Batch Receipt NFT (Layer 2)
+              </button>
+            </div>
+
+            {batchModalTab === "NFT" ? (
+              <div className="space-y-4">
+                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                  <img
+                    src={`/api/nft/merchant/${params.slug}/batch/${selectedBatch.batchIndex}`}
+                    alt="Batch Receipt NFT"
+                    className="w-full h-auto object-contain select-none"
+                  />
                 </div>
-                <p className="text-slate-600">
-                  Hash hasil kalkulasi browser cocok persis dengan data hash yang tersimpan di Smart Contract BNB Smart Chain.
-                </p>
+                <div className="flex gap-2">
+                  <a
+                    href={`/api/nft/merchant/${params.slug}/batch/${selectedBatch.batchIndex}`}
+                    download={`JejaK-Batch-Receipt-${params.slug}-BATCH-${String(selectedBatch.batchIndex).padStart(3, "0")}.svg`}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+                  >
+                    <Download className="w-4 h-4 text-amber-400" />
+                    <span>Unduh Struk NFT (SVG)</span>
+                  </a>
+                  <a
+                    href={selectedBatch.bscScanUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5"
+                  >
+                    <span>BscScan</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
             ) : (
-              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                Pemeriksaan hash selesai.
-              </div>
-            )}
-
-            {/* HASH COMPARISON */}
-            <div className="space-y-3 text-xs font-mono">
-              <div className="space-y-1">
-                <span className="text-[11px] text-slate-500 font-sans font-semibold block">
-                  Hash Terkunci di Smart Contract BSC:
-                </span>
-                <div className="p-2.5 rounded-xl bg-slate-100 text-slate-900 break-all border border-slate-200">
-                  {selectedBatch.dataHash || "-"}
-                </div>
-              </div>
-
-              {recalcResult && (
-                <div className="space-y-1">
-                  <span className="text-[11px] text-slate-500 font-sans font-semibold block">
-                    Hash Dihitung Ulang oleh Browser Anda:
-                  </span>
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-900 break-all border border-emerald-200">
-                    {recalcResult.computedHash}
+              <>
+                {/* STATUS AUDIT LIVE */}
+                {recalculatingHash ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                    <RefreshCw className="w-6 h-6 text-blue-700 animate-spin mx-auto" strokeWidth={1.75} />
+                    <p className="text-xs font-semibold text-slate-700">
+                      Menghitung ulang Keccak256 hash dari data invoice asli...
+                    </p>
                   </div>
-                </div>
-              )}
-            </div>
+                ) : recalcResult && recalcResult.matches ? (
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1 text-xs">
+                    <div className="flex items-center gap-2 font-bold text-sm text-emerald-800">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" strokeWidth={2} />
+                      <span>100% VALID &amp; TIDAK DIMANIPULASI</span>
+                    </div>
+                    <p className="text-slate-600">
+                      Hash hasil kalkulasi browser cocok persis dengan data hash yang tersimpan di Smart Contract BNB Smart Chain.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                    Pemeriksaan hash selesai.
+                  </div>
+                )}
 
-            {/* LIST INVOICE DI DALAM BATCH */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-900 block">
-                Daftar Struk Transaksi di Dalam Batch ({selectedBatch.invoices?.length || 0} Nota)
-              </span>
+                {/* HASH COMPARISON */}
+                <div className="space-y-3 text-xs font-mono">
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500 font-sans font-semibold block">
+                      Hash Terkunci di Smart Contract BSC:
+                    </span>
+                    <div className="p-2.5 rounded-xl bg-slate-100 text-slate-900 break-all border border-slate-200">
+                      {selectedBatch.dataHash || "-"}
+                    </div>
+                  </div>
 
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
-                {selectedBatch.invoices && selectedBatch.invoices.length > 0 ? (
-                  selectedBatch.invoices.map((inv: any) => (
-                    <div
-                      key={inv.id}
-                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-bold text-slate-800">{inv.note || "Transaksi"}</p>
-                        <p className="text-[10px] text-slate-500 font-mono">
-                          {inv.paymentMethod} • ID: {inv.id.slice(0, 8)}...
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono font-bold text-slate-900">
-                          Rp {inv.amount?.toLocaleString("id-ID")}
-                        </span>
-                        {inv.proofImageUrl && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoUrl(inv.proofImageUrl)}
-                            className="p-1 rounded text-blue-700 hover:text-blue-900"
-                            title="Lihat Foto Struk"
-                          >
-                            <Camera className="w-4 h-4" strokeWidth={1.75} />
-                          </button>
-                        )}
+                  {recalcResult && (
+                    <div className="space-y-1">
+                      <span className="text-[11px] text-slate-500 font-sans font-semibold block">
+                        Hash Dihitung Ulang oleh Browser Anda:
+                      </span>
+                      <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-900 break-all border border-emerald-200">
+                        {recalcResult.computedHash}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-slate-400 italic">Tidak ada rincian invoice.</p>
-                )}
-              </div>
-            </div>
+                  )}
+                </div>
+
+                {/* LIST INVOICE DI DALAM BATCH */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-slate-900 block">
+                    Daftar Struk Transaksi di Dalam Batch ({selectedBatch.invoices?.length || 0} Nota)
+                  </span>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                    {selectedBatch.invoices && selectedBatch.invoices.length > 0 ? (
+                      selectedBatch.invoices.map((inv: any) => (
+                        <div
+                          key={inv.id}
+                          className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between"
+                        >
+                          <div>
+                            <span className="font-bold text-slate-900 block">
+                              Rp {inv.amount.toLocaleString("id-ID")}
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {inv.paymentMethod} &bull; {inv.note || "Transaksi Kasir"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {new Date(inv.createdAt).toLocaleTimeString("id-ID", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                            {inv.proofImageUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setPreviewPhotoUrl(inv.proofImageUrl)}
+                                className="p-1 rounded text-blue-700 hover:text-blue-900"
+                                title="Lihat Foto Struk"
+                              >
+                                <Camera className="w-4 h-4" strokeWidth={1.75} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">Tidak ada rincian invoice.</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="pt-2 flex justify-end">
               <button
@@ -638,6 +728,57 @@ export default function LenderVerifierPage({ params }: { params: { slug: string 
                 className="px-4 py-2 rounded-xl bg-slate-950 text-white font-bold text-xs"
               >
                 Tutup Inspektor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: MASTER SOULBOUND TOKEN INSPECTOR */}
+      {showSbtModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-black text-slate-950">
+                  Master Soulbound Token (ERC-5192)
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Sertifikat Akreditasi Reputasi Kredit Resmi UMKM
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSbtModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+              <img
+                src={`/api/nft/merchant/${params.slug}/sbt`}
+                alt="Master SBT"
+                className="w-full h-auto object-contain select-none"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <a
+                href={`/api/nft/merchant/${params.slug}/sbt`}
+                download={`JejaK-Master-SBT-${params.slug}.svg`}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+              >
+                <Download className="w-4 h-4 text-amber-400" />
+                <span>Unduh File Kartu (SVG HD)</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowSbtModal(false)}
+                className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+              >
+                Tutup
               </button>
             </div>
           </div>

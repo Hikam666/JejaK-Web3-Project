@@ -35,6 +35,11 @@ import {
   ChevronDown,
   ChevronUp,
   ShieldCheck,
+  Key,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  Download,
 } from "lucide-react";
 
 interface MenuItem {
@@ -101,6 +106,56 @@ export default function MerchantAppSPA() {
   const [merchantPassportData, setMerchantPassportData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+
+  // State Ekspor Dompet & Uji TC-19 Soulbound
+  const [showExportWalletModal, setShowExportWalletModal] = useState(false);
+  const [exportPinInput, setExportPinInput] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [decryptedWallet, setDecryptedWallet] = useState<{ merchantAddress: string; privateKey: string } | null>(null);
+  const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [testingSoulbound, setTestingSoulbound] = useState(false);
+  const [soulboundTestResult, setSoulboundTestResult] = useState<any>(null);
+
+  // State Modal Inspeksi Visual NFT SBT & Batch Receipt
+  const [showSbtVisualModal, setShowSbtVisualModal] = useState(false);
+  const [selectedBatchNftIndex, setSelectedBatchNftIndex] = useState<number | null>(null);
+
+  const handleDownloadSbt = async () => {
+    if (!currentMerchant?.slug) return;
+    try {
+      const res = await fetch(`/api/nft/merchant/${currentMerchant.slug}/sbt`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `JejaK-Master-SBT-${currentMerchant.slug}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      console.error("Gagal mengunduh kartu SBT:", e);
+    }
+  };
+
+  const handleDownloadBatch = async (batchIdx: number) => {
+    if (!currentMerchant?.slug) return;
+    try {
+      const res = await fetch(`/api/nft/merchant/${currentMerchant.slug}/batch/${batchIdx}`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `JejaK-Batch-Receipt-${currentMerchant.slug}-BATCH-${String(batchIdx).padStart(3, "0")}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      console.error("Gagal mengunduh struk batch:", e);
+    }
+  };
 
   // Cek Sesi Login UMKM & Validasi ke Database
   useEffect(() => {
@@ -375,7 +430,7 @@ export default function MerchantAppSPA() {
     }
   };
 
-  const slug = currentMerchant?.slug || "warung-kopi-barokah";
+  const slug = currentMerchant?.slug || "";
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/verify/${slug}`
@@ -385,6 +440,72 @@ export default function MerchantAppSPA() {
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExportWallet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentMerchant || !exportPinInput) return;
+    setExportLoading(true);
+    setExportError("");
+    try {
+      const res = await fetch("/api/auth/merchant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "export-wallet",
+          merchantId: currentMerchant.id,
+          pin: exportPinInput,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setDecryptedWallet(json.data);
+      } else {
+        setExportError(json.error || "PIN salah. Akses ditolak.");
+      }
+    } catch (err: any) {
+      setExportError(err.message || "Gagal menghubungi server");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleTestSoulboundTransfer = async () => {
+    if (!currentMerchant || !exportPinInput) return;
+    setTestingSoulbound(true);
+    setSoulboundTestResult(null);
+    try {
+      const res = await fetch("/api/nft/test-transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          merchantId: currentMerchant.id,
+          pin: exportPinInput,
+          tokenId: merchantPassportData?.sbt?.tokenId || "1",
+        }),
+      });
+      const json = await res.json();
+      setSoulboundTestResult(json);
+    } catch (err: any) {
+      setSoulboundTestResult({ success: false, error: err.message });
+    } finally {
+      setTestingSoulbound(false);
+    }
+  };
+
+  const handleCopyKey = () => {
+    if (!decryptedWallet) return;
+    navigator.clipboard.writeText(decryptedWallet.privateKey);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const handleCopyAddress = () => {
+    if (!decryptedWallet && !currentMerchant) return;
+    const addr = decryptedWallet?.merchantAddress || currentMerchant?.merchantAddress;
+    navigator.clipboard.writeText(addr);
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2000);
   };
 
   if (loading) {
@@ -437,6 +558,20 @@ export default function MerchantAppSPA() {
           </div>
 
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setShowExportWalletModal(true);
+                setDecryptedWallet(null);
+                setExportPinInput("");
+                setExportError("");
+                setSoulboundTestResult(null);
+              }}
+              className="p-2 rounded-full text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+              title="Ekspor Dompet Web3 / Private Key"
+            >
+              <Key className="w-4 h-4" strokeWidth={1.75} />
+            </button>
             <button
               type="button"
               onClick={handleLogout}
@@ -945,8 +1080,42 @@ export default function MerchantAppSPA() {
                   </div>
                 </div>
 
-                <div className="text-[10px] font-mono text-slate-400 break-all pt-1 border-t border-slate-800">
-                  Wallet: {currentMerchant?.merchantAddress}
+                <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
+                  <div className="text-[10px] font-mono text-slate-400 break-all flex items-center justify-between gap-2">
+                    <span className="truncate">Wallet: {currentMerchant?.merchantAddress}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowExportWalletModal(true);
+                        setDecryptedWallet(null);
+                        setExportPinInput("");
+                        setExportError("");
+                        setSoulboundTestResult(null);
+                      }}
+                      className="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-bold flex items-center gap-1 border border-amber-500/30 transition-all cursor-pointer"
+                    >
+                      <Key className="w-3 h-3 text-amber-400" />
+                      <span>Ekspor Dompet</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowSbtVisualModal(true)}
+                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98]"
+                    >
+                      <Sparkles className="w-4 h-4 text-slate-950" />
+                      <span>Lihat Visual SBT</span>
+                    </button>
+                    <Link
+                      href="/merchant/passport"
+                      className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <span>Lembar Paspor HD</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -1023,19 +1192,29 @@ export default function MerchantAppSPA() {
                             {new Date(b.periodDate || b.createdAt).toLocaleDateString("id-ID")}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right space-y-1">
                           <p className="font-mono font-bold text-slate-900">
                             Rp {b.totalRevenue.toLocaleString("id-ID")}
                           </p>
-                          <a
-                            href={b.txHash ? `https://testnet.bscscan.com/tx/${b.txHash}` : "#"}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[10px] text-blue-700 hover:underline inline-flex items-center gap-0.5 font-medium"
-                          >
-                            <span>BscScan</span>
-                            <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
-                          </a>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedBatchNftIndex(idx + 1)}
+                              className="px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold inline-flex items-center gap-1 transition-all"
+                            >
+                              <Eye className="w-2.5 h-2.5 text-amber-600" />
+                              <span>Struk NFT</span>
+                            </button>
+                            <a
+                              href={b.bscTxHash || b.txHash ? `https://testnet.bscscan.com/tx/${b.bscTxHash || b.txHash}` : "#"}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[10px] text-blue-700 hover:underline inline-flex items-center gap-0.5 font-medium"
+                            >
+                              <span>BscScan</span>
+                              <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+                            </a>
+                          </div>
                         </div>
                       </div>
                     ))
@@ -1220,6 +1399,374 @@ export default function MerchantAppSPA() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EKSPOR DOMPET WEB3 & UJI TC-19 */}
+      {showExportWalletModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-5 sm:p-6 space-y-4 border border-slate-200 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">
+                    Ekspor Dompet Web3
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-mono">BNB Smart Chain (Chain ID: 97)</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExportWalletModal(false);
+                  setDecryptedWallet(null);
+                  setExportPinInput("");
+                  setExportError("");
+                  setSoulboundTestResult(null);
+                }}
+                className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!decryptedWallet ? (
+              <form onSubmit={handleExportWallet} className="space-y-4 pt-1">
+                <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900 space-y-1">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-700" />
+                    Otentikasi Keamanan Toko
+                  </p>
+                  <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                    Kunci privat dompet EVM memegang hak kepemilikan penuh atas Master Soulbound Token (SBT) dan Batch NFT toko Anda. Masukkan PIN kasir 6 digit untuk mendekripsi.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    PIN Kasir (6 Digit)
+                  </label>
+                  <input
+                    type="password"
+                    maxLength={6}
+                    required
+                    placeholder="••••••"
+                    value={exportPinInput}
+                    onChange={(e) => setExportPinInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-center tracking-widest text-base font-mono font-bold text-slate-900 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none"
+                    autoFocus
+                  />
+                </div>
+
+                {exportError && (
+                  <p className="text-xs text-rose-600 font-semibold bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center">
+                    {exportError}
+                  </p>
+                )}
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowExportWalletModal(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={exportLoading || exportPinInput.length < 6}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                  >
+                    {exportLoading ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Mendekripsi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Key className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Buka Kunci</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4 pt-1 text-xs">
+                {/* PUBLIC ADDRESS */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">
+                    Alamat Dompet Toko (Public Address)
+                  </label>
+                  <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-800">
+                    <span className="truncate flex-1">{decryptedWallet.merchantAddress}</span>
+                    <button
+                      type="button"
+                      onClick={handleCopyAddress}
+                      className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 shrink-0"
+                      title="Salin Alamat"
+                    >
+                      {copiedAddress ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                    <a
+                      href={`https://testnet.bscscan.com/address/${decryptedWallet.merchantAddress}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-lg hover:bg-slate-200 text-blue-600 shrink-0"
+                      title="Lihat di BscScan"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* PRIVATE KEY */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-700 block">
+                      Private Key Toko (Rahasia)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivateKey(!showPrivateKey)}
+                      className="text-[10px] font-bold text-blue-700 hover:underline flex items-center gap-1"
+                    >
+                      {showPrivateKey ? (
+                        <>
+                          <EyeOff className="w-3 h-3" /> Sembunyikan
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3" /> Tampilkan
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-amber-300">
+                    <span className="truncate flex-1 select-all">
+                      {showPrivateKey ? decryptedWallet.privateKey : "••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyKey}
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 shrink-0"
+                      title="Salin Private Key"
+                    >
+                      {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* CAUTION BOX */}
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 space-y-1 text-[11px] leading-relaxed">
+                  <p className="font-bold flex items-center gap-1.5 text-rose-800">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    Peringatan Keamanan Kritis
+                  </p>
+                  <p className="text-rose-900/90">
+                    Jangan pernah bagikan Private Key ini ke siapa pun. Kunci ini memberikan kendali penuh terhadap tanda tangan kriptografis dan aset reputasi toko Anda.
+                  </p>
+                </div>
+
+                {/* METAMASK IMPORT GUIDE */}
+                <div className="p-3 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-1.5 text-[11px] text-slate-700">
+                  <p className="font-bold text-blue-950 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-700" />
+                    Cara Impor ke MetaMask / Trust Wallet:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-0.5 text-slate-600 text-[10.5px]">
+                    <li>Buka MetaMask &rarr; klik ikon Akun &rarr; pilih <b>Import Account</b></li>
+                    <li>Tempelkan <i>Private Key</i> di atas &rarr; klik <b>Import</b></li>
+                    <li>Pastikan jaringan aktif diatur ke <b>BNB Smart Chain Testnet</b></li>
+                  </ol>
+                </div>
+
+                {/* TC-19 INTERACTIVE SOULBOUND VERIFICATION */}
+                <div className="p-3.5 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="font-bold text-xs text-white">Uji Proteksi Soulbound (TC-19)</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 font-mono text-[9px] font-bold">
+                      EIP-5192
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                    Simulasikan transaksi transfer NFT paspor dari dompet Anda ke alamat lain untuk membuktikan smart contract menolak pemindahtanganan.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleTestSoulboundTransfer}
+                    disabled={testingSoulbound}
+                    className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
+                  >
+                    {testingSoulbound ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Menguji ke Smart Contract BSC...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Jalankan Simulasi Transfer (Uji TC-19)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {soulboundTestResult && (
+                    <div className={`p-2.5 rounded-xl border text-[10.5px] space-y-1 ${
+                      soulboundTestResult.testPassed
+                        ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200"
+                        : "bg-rose-950/60 border-rose-500/50 text-rose-200"
+                    }`}>
+                      <div className="flex items-center gap-1.5 font-bold">
+                        {soulboundTestResult.testPassed ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-emerald-300">TC-19 LULUS: Smart Contract Merevert Transfer!</span>
+                          </>
+                        ) : (
+                          <>
+                            <X className="w-3.5 h-3.5 text-rose-400" />
+                            <span>Gagal: {soulboundTestResult.error}</span>
+                          </>
+                        )}
+                      </div>
+                      {soulboundTestResult.revertReason && (
+                        <p className="font-mono text-[10px] text-amber-300 bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+                          Revert: &quot;{soulboundTestResult.revertReason}&quot;
+                        </p>
+                      )}
+                      <p className="text-[9.5px] text-slate-300">
+                        {soulboundTestResult.explanation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowExportWalletModal(false);
+                      setDecryptedWallet(null);
+                      setExportPinInput("");
+                      setExportError("");
+                      setSoulboundTestResult(null);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL INSPEKSI VISUAL MASTER SOULBOUND TOKEN (ERC-5192) */}
+      {showSbtVisualModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 space-y-4 border border-slate-200 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Visual Master Soulbound Token (ERC-5192)
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSbtVisualModal(false)}
+                className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Visual SVG Card Preview */}
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-lg bg-slate-900">
+              <img
+                src={`/api/nft/merchant/${currentMerchant?.slug}/sbt`}
+                alt="JejaK Master Soulbound Token"
+                className="w-full h-auto object-contain select-none"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleDownloadSbt}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+              >
+                <Download className="w-4 h-4 text-amber-400" />
+                <span>Unduh Paspor (SVG HD)</span>
+              </button>
+              <Link
+                href="/merchant/passport"
+                className="py-2.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              >
+                <span>Buka Lembar Paspor</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL INSPEKSI VISUAL BATCH RECEIPT NFT (LAYER 2) */}
+      {selectedBatchNftIndex !== null && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-5 space-y-4 border border-slate-200 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Batch Receipt NFT #BATCH-{String(selectedBatchNftIndex).padStart(3, "0")}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedBatchNftIndex(null)}
+                className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Visual SVG Struk Preview */}
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+              <img
+                src={`/api/nft/merchant/${currentMerchant?.slug}/batch/${selectedBatchNftIndex}`}
+                alt={`Batch Receipt NFT #${selectedBatchNftIndex}`}
+                className="w-full h-auto object-contain select-none"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleDownloadBatch(selectedBatchNftIndex)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+              >
+                <Download className="w-4 h-4 text-amber-400" />
+                <span>Unduh Struk NFT (SVG)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedBatchNftIndex(null)}
+                className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

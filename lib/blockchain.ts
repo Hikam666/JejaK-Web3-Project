@@ -14,18 +14,26 @@ const CONTRACT_ABI = [
   "function totalMerchantsWithSBT() external view returns (uint256)",
   "function locked(uint256 tokenId) external view returns (bool)",
   "function tokenURI(uint256 tokenId) external view returns (string memory)",
+  "function tokenTypes(uint256 tokenId) external view returns (uint8)",
+  "function setMetadataURIs(string memory _baseMetadataURI, string memory _imageGatewayURI) external",
+  "function baseMetadataURI() external view returns (string memory)",
+  "function imageGatewayURI() external view returns (string memory)",
+  "function balanceOf(address owner) external view returns (uint256)",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
   "event RecordAnchored(address indexed merchant, bytes32 indexed dataHash, uint256 totalRevenue, uint256 txCount, uint256 timestamp)",
   "event MasterSBTMinted(address indexed merchant, uint256 indexed masterTokenId, uint8 tier, uint256 creditScore, uint256 totalRevenue)",
   "event MasterSBTUpdated(address indexed merchant, uint256 indexed masterTokenId, uint8 tier, uint256 creditScore, uint256 totalRevenue, uint256 totalBatches)",
   "event BatchReceiptNFTMinted(address indexed merchant, uint256 indexed batchTokenId, uint256 batchIndex, uint256 totalRevenue, bytes32 dataHash)"
 ];
 
-const RPC_URL = process.env.BSC_TESTNET_RPC_URL || "https://data-seed-prebsc-2-s1.bnbchain.org:8545";
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x5d63B3B1112D5a809b92f2F538Ce6923347a2335";
+const RPC_URL = process.env.BSC_TESTNET_RPC_URL || "https://data-seed-prebsc-1-s1.bnbchain.org:8545";
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x764f397Bf9E54b534F9756ef897744F0B0D3De04";
 const RELAYER_PVKEY = process.env.RELAYER_PRIVATE_KEY;
 
 export function getProvider() {
-  return new ethers.JsonRpcProvider(RPC_URL);
+  const net = ethers.Network.from({ name: "bnbt", chainId: 97 });
+  return new ethers.JsonRpcProvider(RPC_URL, net, { staticNetwork: net });
 }
 
 export function getRelayerSigner() {

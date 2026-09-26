@@ -28,8 +28,18 @@ export async function POST(request: Request) {
       });
     }
 
+    if (action === "export-wallet") {
+      const { merchantId, pin } = body;
+      const walletData = await AuthController.exportWallet(merchantId, pin);
+      return NextResponse.json({
+        success: true,
+        message: "Kunci privat berhasil didekripsi",
+        data: walletData,
+      });
+    }
+
     return NextResponse.json(
-      { success: false, error: "Action tidak dikenali (gunakan 'login' atau 'register')" },
+      { success: false, error: "Action tidak dikenali (gunakan 'login', 'register', atau 'export-wallet')" },
       { status: 400 }
     );
   } catch (error: any) {

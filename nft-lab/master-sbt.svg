@@ -1,0 +1,278 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 1050" width="700" height="1050" style="background:#f4f4f6; font-family: 'Cinzel', 'Playfair Display', Georgia, serif;">
+  <defs>
+    <!-- Soft Drop Shadows -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#0b1329" flood-opacity="0.14" />
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0b1329" flood-opacity="0.08" />
+    </filter>
+    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#070d1e" flood-opacity="0.32" />
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+    <filter id="embossBevel" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1" flood-color="#ffffff" flood-opacity="0.8" />
+      <feDropShadow dx="-1" dy="-1" stdDeviation="1" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+
+    <!-- Metallic Gold Gradients -->
+    <linearGradient id="goldSheen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF2B7" />
+      <stop offset="25%" stop-color="#E2B857" />
+      <stop offset="50%" stop-color="#B8861E" />
+      <stop offset="75%" stop-color="#F5DB8B" />
+      <stop offset="100%" stop-color="#9E6E17" />
+    </linearGradient>
+
+    <linearGradient id="goldBevelLight" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#AA7A1E" />
+      <stop offset="35%" stop-color="#FCEBB6" />
+      <stop offset="70%" stop-color="#DFB349" />
+      <stop offset="100%" stop-color="#8C5C0D" />
+    </linearGradient>
+
+    <!-- Royal Navy Batik Band Gradient -->
+    <linearGradient id="royalNavyBatik" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0A162B" />
+      <stop offset="50%" stop-color="#0F244A" />
+      <stop offset="100%" stop-color="#07101E" />
+    </linearGradient>
+
+    <!-- Subtle Ceramic Background -->
+    <linearGradient id="porcelainBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="45%" stop-color="#FBFBFC" />
+      <stop offset="100%" stop-color="#F3F5F8" />
+    </linearGradient>
+
+    <!-- Batik Pattern Definition (Kawung / Floral Petals in Gold) -->
+    <pattern id="batikFloral" width="50" height="50" patternUnits="userSpaceOnUse">
+      <g opacity="0.35">
+        <circle cx="25" cy="25" r="8" fill="none" stroke="url(#goldSheen)" stroke-width="0.75" />
+        <ellipse cx="25" cy="12" rx="6" ry="11" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" />
+        <ellipse cx="25" cy="38" rx="6" ry="11" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" />
+        <ellipse cx="12" cy="25" rx="11" ry="6" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" />
+        <ellipse cx="38" cy="25" rx="11" ry="6" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" />
+        <polygon points="25,21 28,25 25,29 22,25" fill="url(#goldSheen)" opacity="0.85" />
+      </g>
+    </pattern>
+  </defs>
+
+  <!-- OUTER CONTAINER CARD -->
+  <g transform="translate(30, 25)">
+    <!-- Main Card Body -->
+    <rect x="0" y="0" width="640" height="1000" rx="36" fill="url(#porcelainBg)" filter="url(#cardShadow)" />
+    <!-- Fine Border -->
+    <rect x="0" y="0" width="640" height="1000" rx="36" fill="none" stroke="#E6E9EF" stroke-width="1.5" />
+
+    <!-- WATERMARK: LEFT BOTANICAL LEAF LINEAGE -->
+    <g opacity="0.22" transform="translate(10, 220)">
+      <path d="M 40 400 C 60 300, 30 180, 110 90 C 130 150, 100 240, 70 330 Z" fill="none" stroke="#64748B" stroke-width="1.2" />
+      <path d="M 60 310 C 90 280, 140 270, 160 300 C 130 330, 80 340, 60 310 Z" fill="#94A3B8" opacity="0.4" />
+      <path d="M 45 250 C 20 200, 25 150, 60 140 C 70 180, 60 220, 45 250 Z" fill="#94A3B8" opacity="0.35" />
+      <path d="M 80 200 C 110 160, 150 150, 170 180 C 140 210, 100 220, 80 200 Z" fill="#94A3B8" opacity="0.4" />
+      <path d="M 95 130 C 80 90, 100 50, 140 50 C 150 90, 130 120, 95 130 Z" fill="#94A3B8" opacity="0.35" />
+    </g>
+
+    <!-- GOLDEN SWIRL HAIRLINES (Graceful luxury curves) -->
+    <path d="M 230 40 C 270 90, 280 180, 330 220" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" opacity="0.7" />
+    <path d="M 370 650 C 440 700, 420 850, 480 920" fill="none" stroke="url(#goldSheen)" stroke-width="0.8" opacity="0.7" />
+
+    <!-- VERTICAL ROYAL NAVY BATIK RIBBON STRIP -->
+    <g transform="translate(250, 0)">
+      <!-- Navy Band Base -->
+      <rect x="0" y="0" width="140" height="1000" fill="url(#royalNavyBatik)" />
+      <!-- Batik Pattern Overlay -->
+      <rect x="0" y="0" width="140" height="1000" fill="url(#batikFloral)" />
+      <!-- Golden Border Flanks -->
+      <line x1="0" y1="0" x2="0" y2="1000" stroke="url(#goldSheen)" stroke-width="1.5" />
+      <line x1="140" y1="0" x2="140" y2="1000" stroke="url(#goldSheen)" stroke-width="1.5" />
+
+      <!-- Golden Rosettes on Ribbon (Top and Bottom) -->
+      <g transform="translate(70, 75) scale(0.9)">
+        <polygon points="0,-18 5,-5 18,0 5,5 0,18 -5,5 -18,0 -5,-5" fill="url(#goldSheen)" />
+        <circle cx="0" cy="0" r="4" fill="#0A162B" />
+      </g>
+      <g transform="translate(70, 920) scale(0.9)">
+        <polygon points="0,-18 5,-5 18,0 5,5 0,18 -5,5 -18,0 -5,-5" fill="url(#goldSheen)" />
+        <circle cx="0" cy="0" r="4" fill="#0A162B" />
+      </g>
+    </g>
+
+    <!-- ==================== TOP SECTION ==================== -->
+    <!-- TOP LEFT: TITLE & IDENTITY -->
+    <g transform="translate(48, 70)">
+      <text x="0" y="42" font-size="44" font-weight="900" letter-spacing="1" fill="#0B1528" font-family="'Cinzel', Georgia, serif">UMKM</text>
+      <text x="0" y="90" font-size="44" font-weight="900" letter-spacing="1" fill="#0B1528" font-family="'Cinzel', Georgia, serif">SBT</text>
+      
+      <text x="0" y="124" font-size="10" font-weight="700" letter-spacing="2.8" fill="#1E3A8A" font-family="'Inter', -apple-system, sans-serif">INDONESIAN MSME</text>
+      <text x="0" y="139" font-size="10" font-weight="700" letter-spacing="2.8" fill="#1E3A8A" font-family="'Inter', -apple-system, sans-serif">IDENTITY TOKEN</text>
+
+      <line x1="0" y1="156" x2="28" y2="156" stroke="url(#goldSheen)" stroke-width="2.5" stroke-linecap="round" />
+
+      <text x="0" y="178" font-size="9" font-weight="800" letter-spacing="2.2" fill="#64748B" font-family="'Inter', sans-serif">LOKAL</text>
+      <text x="0" y="193" font-size="9" font-weight="800" letter-spacing="2.2" fill="#64748B" font-family="'Inter', sans-serif">BERDAYA</text>
+      <text x="0" y="208" font-size="9" font-weight="800" letter-spacing="2.2" fill="#64748B" font-family="'Inter', sans-serif">BERDAMPAK</text>
+    </g>
+
+    <!-- TOP RIGHT: INDONESIA MAP & MOTTO -->
+    <g transform="translate(590, 70)" text-anchor="end">
+      <text x="0" y="16" font-size="9.5" font-weight="800" letter-spacing="2.4" fill="#0F172A" font-family="'Inter', sans-serif">SMALL</text>
+      <text x="0" y="30" font-size="9.5" font-weight="800" letter-spacing="2.4" fill="#0F172A" font-family="'Inter', sans-serif">BUSINESS</text>
+      <text x="0" y="44" font-size="9.5" font-weight="800" letter-spacing="2.4" fill="#0F172A" font-family="'Inter', sans-serif">BIGGER</text>
+      <text x="0" y="58" font-size="9.5" font-weight="800" letter-spacing="2.4" fill="#1E3A8A" font-family="'Inter', sans-serif">INDONESIA</text>
+      <line x1="-24" y1="70" x2="0" y2="70" stroke="url(#goldSheen)" stroke-width="2" />
+
+      <!-- Minimal Indonesia Map Silhouette -->
+      <g transform="translate(-160, 92) scale(0.28)" opacity="0.35">
+        <path d="M 18 93 C 34 112, 48 130, 78 169 C 107 207, 127 222, 142 194 C 151 190, 149 184, 142 174 C 114 161, 102 140, 86 130 C 58 111, 37 95, 18 93 Z M 257 106 C 249 121, 238 138, 213 140 C 177 153, 190 184, 213 195 C 241 200, 262 198, 276 158 C 289 141, 281 131, 274 107 Z M 357 140 C 320 141, 302 158, 296 173 C 290 190, 298 211, 308 217 C 320 201, 331 194, 333 170 C 343 167, 360 145, 357 140 Z M 443 161 C 434 166, 436 173, 441 176 C 455 182, 464 183, 453 199 C 468 201, 483 207, 513 221 C 546 186, 538 183, 506 174 C 474 187, 462 164, 443 161 Z" fill="#334155" />
+      </g>
+    </g>
+
+    <!-- ==================== CENTERPIECE GOLD HEXAGON EMBLEM ==================== -->
+    <g transform="translate(320, 395)" filter="url(#badgeShadow)">
+      <!-- Outer Beveled Gold Hexagon -->
+      <!-- Hexagon points: radius 140 -->
+      <polygon points="0,-140 121,-70 121,70 0,140 -121,70 -121,-70" fill="url(#goldBevelLight)" />
+      
+      <!-- Inner Stepped Border -->
+      <polygon points="0,-132 114,-66 114,66 0,132 -114,66 -114,-66" fill="url(#goldSheen)" />
+
+      <!-- Deep Dark Plaque Center -->
+      <polygon points="0,-122 105,-61 105,61 0,122 -105,61 -105,-61" fill="#071224" />
+
+      <!-- Delicate Inner Gold Hairline Inside Plaque -->
+      <polygon points="0,-115 99,-57 99,57 0,115 -99,57 -99,-57" fill="none" stroke="url(#goldSheen)" stroke-width="1.2" opacity="0.6" />
+
+      <!-- Gold Floral Petals Top (Above Shopfront) -->
+      <g transform="translate(0, -78) scale(0.65)">
+        <polygon points="0,-14 4,-4 14,0 4,4 0,14 -4,4 -14,0 -4,-4" fill="url(#goldSheen)" />
+        <circle cx="0" cy="0" r="3" fill="#071224" />
+      </g>
+
+      <!-- EMBOSSED GOLD WARUNG / SHOPFRONT ICON -->
+      <g transform="translate(0, 0)" filter="url(#embossBevel)">
+        <!-- Roof Awning -->
+        <path d="M -56 -24 L 56 -24 L 64 -6 C 64 2, 54 8, 48 8 C 42 8, 38 4, 32 8 C 26 12, 20 8, 16 8 C 12 8, 6 12, 0 8 C -6 12, -12 8, -16 8 C -20 8, -26 12, -32 8 C -38 4, -42 8, -48 8 C -54 8, -64 2, -64 -6 Z" fill="url(#goldSheen)" />
+        
+        <!-- Awning Roof Stripes Lines -->
+        <line x1="-48" y1="-22" x2="-48" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="-32" y1="-22" x2="-32" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="-16" y1="-22" x2="-16" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="0" y1="-22" x2="0" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="16" y1="-22" x2="16" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="32" y1="-22" x2="32" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+        <line x1="48" y1="-22" x2="48" y2="4" stroke="#8C5C0D" stroke-width="1.2" />
+
+        <!-- Store Front Structure & Counter -->
+        <!-- Pillars -->
+        <rect x="-50" y="8" width="6" height="52" fill="url(#goldSheen)" />
+        <rect x="44" y="8" width="6" height="52" fill="url(#goldSheen)" />
+
+        <!-- Counter & Shelves Left -->
+        <rect x="-44" y="28" width="46" height="4" fill="url(#goldSheen)" />
+        <rect x="-44" y="44" width="46" height="16" fill="url(#goldSheen)" />
+        <!-- Jars on shelf -->
+        <rect x="-40" y="16" width="9" height="12" rx="2" fill="url(#goldSheen)" />
+        <rect x="-28" y="16" width="9" height="12" rx="2" fill="url(#goldSheen)" />
+        <rect x="-16" y="16" width="9" height="12" rx="2" fill="url(#goldSheen)" />
+
+        <!-- Bar Stool Right -->
+        <ellipse cx="26" cy="34" rx="10" ry="3" fill="url(#goldSheen)" />
+        <line x1="20" y1="35" x2="16" y2="60" stroke="url(#goldSheen)" stroke-width="3" stroke-linecap="round" />
+        <line x1="32" y1="35" x2="36" y2="60" stroke="url(#goldSheen)" stroke-width="3" stroke-linecap="round" />
+        <line x1="18" y1="48" x2="34" y2="48" stroke="url(#goldSheen)" stroke-width="2" />
+
+        <!-- Base Foundation Line -->
+        <rect x="-56" y="60" width="112" height="4" rx="1.5" fill="url(#goldSheen)" />
+
+        <!-- Sprout Leaf of Prosperity (Right side) -->
+        <path d="M 52 48 C 58 40, 72 38, 74 24 C 64 26, 54 36, 52 48 Z" fill="url(#goldSheen)" />
+      </g>
+
+      <!-- Badge Motto Bottom -->
+      <text x="0" y="88" font-size="8.5" font-weight="800" letter-spacing="2.2" fill="url(#goldSheen)" text-anchor="middle" font-family="'Inter', sans-serif">DARI LOKAL</text>
+      <text x="0" y="100" font-size="8.5" font-weight="800" letter-spacing="2.2" fill="url(#goldSheen)" text-anchor="middle" font-family="'Inter', sans-serif">UNTUK DUNIA</text>
+      <line x1="-14" y1="108" x2="14" y2="108" stroke="url(#goldSheen)" stroke-width="1.5" />
+    </g>
+
+    <!-- MIDDLE RIGHT: SOULBOUND LOCK BADGE -->
+    <g transform="translate(540, 525)" text-anchor="middle">
+      <!-- Circular Lock Container -->
+      <circle cx="0" cy="0" r="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" filter="url(#embossBevel)" />
+      <!-- Lock Icon SVG inside -->
+      <g transform="translate(-8, -10) scale(0.7)">
+        <rect x="3" y="11" width="18" height="11" rx="2" fill="#0B132B" />
+        <path d="M 7 11 V 7 C 7 4.2 9.2 2 12 2 C 14.8 2 17 4.2 17 7 V 11" fill="none" stroke="#0B132B" stroke-width="2.5" stroke-linecap="round" />
+        <circle cx="12" cy="16" r="1.5" fill="#FFFFFF" />
+      </g>
+      <text x="0" y="44" font-size="11.5" font-weight="800" fill="#0F172A" font-family="'Inter', sans-serif">Non-Transferable</text>
+      <text x="0" y="58" font-size="8.5" font-weight="800" letter-spacing="1.5" fill="#64748B" font-family="'Inter', sans-serif">SOULBOUND</text>
+      <text x="0" y="69" font-size="8.5" font-weight="800" letter-spacing="1.5" fill="#64748B" font-family="'Inter', sans-serif">TOKEN</text>
+    </g>
+
+    <!-- ==================== BOTTOM SECTION: DATA BUBBLE CARD ==================== -->
+    <g transform="translate(48, 620)">
+      <!-- Bubble Card Container -->
+      <rect x="0" y="0" width="544" height="230" rx="22" fill="#FFFFFF" stroke="#E6D3A3" stroke-width="1.2" filter="url(#cardShadow)" />
+
+      <!-- Inner Rows (5 Pill Containers) -->
+      <!-- Row 1: UMKM ID -->
+      <g transform="translate(18, 16)">
+        <text x="12" y="22" font-size="10.5" font-weight="800" letter-spacing="1.5" fill="#1E293B" font-family="'Inter', sans-serif">UMKM ID</text>
+        <text x="175" y="22" font-size="11" font-weight="700" fill="#64748B">:</text>
+        <rect x="195" y="4" width="315" height="28" rx="8" fill="#F1F5F9" />
+        <text x="210" y="23" font-size="11" font-weight="800" fill="#0F172A" font-family="'JetBrains Mono', monospace">JK-UMKM-2026-0812</text>
+      </g>
+
+      <!-- Row 2: OWNER WALLET -->
+      <g transform="translate(18, 56)">
+        <text x="12" y="22" font-size="10.5" font-weight="800" letter-spacing="1.5" fill="#1E293B" font-family="'Inter', sans-serif">OWNER WALLET</text>
+        <text x="175" y="22" font-size="11" font-weight="700" fill="#64748B">:</text>
+        <rect x="195" y="4" width="315" height="28" rx="8" fill="#F1F5F9" />
+        <text x="210" y="23" font-size="11" font-weight="800" fill="#1E3A8A" font-family="'JetBrains Mono', monospace">0xc804...4746</text>
+      </g>
+
+      <!-- Row 3: CATEGORY -->
+      <g transform="translate(18, 96)">
+        <text x="12" y="22" font-size="10.5" font-weight="800" letter-spacing="1.5" fill="#1E293B" font-family="'Inter', sans-serif">CATEGORY</text>
+        <text x="175" y="22" font-size="11" font-weight="700" fill="#64748B">:</text>
+        <rect x="195" y="4" width="315" height="28" rx="8" fill="#F1F5F9" />
+        <text x="210" y="23" font-size="11" font-weight="700" fill="#0F172A" font-family="'Inter', sans-serif">Food & Beverage (Kuliner)</text>
+      </g>
+
+      <!-- Row 4: REGION -->
+      <g transform="translate(18, 136)">
+        <text x="12" y="22" font-size="10.5" font-weight="800" letter-spacing="1.5" fill="#1E293B" font-family="'Inter', sans-serif">REGION</text>
+        <text x="175" y="22" font-size="11" font-weight="700" fill="#64748B">:</text>
+        <rect x="195" y="4" width="315" height="28" rx="8" fill="#F1F5F9" />
+        <text x="210" y="23" font-size="11" font-weight="700" fill="#0F172A" font-family="'Inter', sans-serif">Surabaya, Jawa Timur</text>
+      </g>
+
+      <!-- Row 5: REPUTATION SCORE -->
+      <g transform="translate(18, 176)">
+        <text x="12" y="22" font-size="10.5" font-weight="800" letter-spacing="1.5" fill="#1E293B" font-family="'Inter', sans-serif">REPUTATION SCORE</text>
+        <text x="175" y="22" font-size="11" font-weight="700" fill="#64748B">:</text>
+        <rect x="195" y="4" width="315" height="28" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1" />
+        <text x="210" y="23" font-size="12" font-weight="900" fill="#1D4ED8" font-family="'JetBrains Mono', monospace">785 / 850 &bull; Tier Gold (Sangat Layak)</text>
+      </g>
+    </g>
+
+    <!-- ==================== FOOTER SECTION ==================== -->
+    <!-- Bottom Left -->
+    <g transform="translate(48, 890)">
+      <text x="0" y="14" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E293B" font-family="'Inter', sans-serif">INDONESIA</text>
+      <text x="0" y="28" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E293B" font-family="'Inter', sans-serif">LEBIH MAJU</text>
+      <text x="0" y="42" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E3A8A" font-family="'Inter', sans-serif">BERSAMA UMKM</text>
+      <line x1="0" y1="52" x2="24" y2="52" stroke="url(#goldSheen)" stroke-width="2" />
+    </g>
+
+    <!-- Bottom Right -->
+    <g transform="translate(590, 890)" text-anchor="end">
+      <text x="0" y="14" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E293B" font-family="'Inter', sans-serif">REAL</text>
+      <text x="0" y="28" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E293B" font-family="'Inter', sans-serif">BUSINESS</text>
+      <text x="0" y="42" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E293B" font-family="'Inter', sans-serif">REAL</text>
+      <text x="0" y="56" font-size="10" font-weight="800" letter-spacing="1.6" fill="#1E3A8A" font-family="'Inter', sans-serif">IMPACT</text>
+      <line x1="-24" y1="66" x2="0" y2="66" stroke="url(#goldSheen)" stroke-width="2" />
+    </g>
+  </g>
+</svg>

@@ -18,12 +18,10 @@ export class MerchantModel {
       where: { slug },
       include: {
         anchors: {
-          orderBy: { periodDate: "desc" },
-          take: 10,
+          orderBy: { anchoredAt: "desc" },
         },
         transactions: {
           orderBy: { createdAt: "desc" },
-          take: 20,
         },
       },
     });
@@ -32,18 +30,42 @@ export class MerchantModel {
   static async findById(id: string) {
     return prisma.merchant.findUnique({
       where: { id },
+      include: {
+        anchors: {
+          orderBy: { anchoredAt: "desc" },
+        },
+        transactions: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
   }
 
   static async findByPhone(phone: string) {
     return prisma.merchant.findFirst({
       where: { phone },
+      include: {
+        anchors: {
+          orderBy: { anchoredAt: "desc" },
+        },
+        transactions: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
   }
 
   static async findByAddress(merchantAddress: string) {
     return prisma.merchant.findUnique({
       where: { merchantAddress },
+      include: {
+        anchors: {
+          orderBy: { anchoredAt: "desc" },
+        },
+        transactions: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
   }
 
