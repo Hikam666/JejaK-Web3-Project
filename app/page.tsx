@@ -43,7 +43,7 @@ export default function HomePage() {
               Tiga Gerbang Akses Terpadu
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm max-w-xl mx-auto">
-              Solusi terdesentralisasi tanpa gesekan untuk merchant mikro, analis bank, dan pengelola relayer.
+              Solusi terdesentralisasi tanpa gesekan untuk merchant mikro, analis bank, dan ekosistem Web3.
             </p>
           </div>
 
@@ -106,30 +106,30 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Bubble Card 3: Gas Tank Monitor */}
+            {/* Bubble Card 3: Digital Soulbound Passport */}
             <div className="bg-white rounded-[28px] p-7 border border-slate-200/90 shadow-bubble hover:shadow-card-hover transition-all flex flex-col justify-between group">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800">
-                  <Zap className="w-6 h-6" strokeWidth={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                  <Sparkles className="w-6 h-6" strokeWidth={1.75} />
                 </div>
                 <div className="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold font-mono">
-                  OPERATOR DASHBOARD
+                  ON-CHAIN REPUTATION
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                  3. Gas Tank &amp; Relayer Monitor
+                  3. Paspor Digital &amp; SBT
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  Pemantau saldo tBNB relayer secara real-time, statistik gas terpakai, dan audit log on-chain yang memastikan transaksi pedagang tersubsidi dengan lancar.
+                  Paspor kredit bisnis on-chain berbasis standar EIP-5192 (Soulbound Token). Terkunci permanen pada dompet UMKM dan membuktikan integritas omzet toko tanpa risiko pemalsuan.
                 </p>
               </div>
 
               <div className="pt-6 border-t border-slate-100 mt-6">
                 <Link
-                  href="/admin"
+                  href="/verify"
                   prefetch={true}
-                  className="text-slate-900 hover:text-slate-700 text-xs font-bold flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform"
+                  className="text-amber-700 hover:text-amber-800 text-xs font-bold flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform"
                 >
-                  <span>Pantau Saldo Relayer</span>
+                  <span>Lihat Demo Paspor</span>
                   <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.75} />
                 </Link>
               </div>
@@ -264,6 +264,27 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* FOOTER BAR */}
+      <footer className="py-6 border-t border-slate-200/80 bg-white text-center text-xs text-slate-500">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p>&copy; {new Date().getFullYear()} JejaK Protocol. Powered by BNB Smart Chain.</p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <Link href="/verify" className="hover:text-slate-800 transition-colors">
+              Direktori Bank
+            </Link>
+            <Link href="/merchant/login" className="hover:text-slate-800 transition-colors">
+              Portal Kasir
+            </Link>
+            <Link
+              href="/admin/login"
+              className="text-slate-400 hover:text-slate-600 transition-colors font-mono text-[10px]"
+            >
+              Operator
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
