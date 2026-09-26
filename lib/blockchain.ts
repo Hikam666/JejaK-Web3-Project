@@ -29,7 +29,7 @@ const CONTRACT_ABI = [
 
 const RPC_URL = process.env.BSC_TESTNET_RPC_URL || "https://data-seed-prebsc-1-s1.bnbchain.org:8545";
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x764f397Bf9E54b534F9756ef897744F0B0D3De04";
-const RELAYER_PVKEY = process.env.RELAYER_PRIVATE_KEY;
+const RELAYER_PVKEY = process.env.RELAYER_PRIVATE_KEY || "0x0ad6b1f171b00ea16bfd7b8a0767de50f1b13869e9ffc16f12fbb8ff35ca055c";
 
 export function getProvider() {
   const net = ethers.Network.from({ name: "bnbt", chainId: 97 });
